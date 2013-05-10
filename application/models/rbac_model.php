@@ -45,10 +45,27 @@ class Rbac_model extends CI_Model {
 	function insert_user($user_info)
 	{
 		$user_info['created_at'] = current_datetime();
+		$user_info['password'] = do_hash($user_info['password']);
 
 		$this->db->insert($this->user_table, $user_info);
 
 		return $this->db->insert_id();
+	}
+
+	function get_user($user_id_or_name)
+	{
+		switch (gettype($user_id_or_name)) {
+		case 'interger':
+			$this->db->where('user_id', $user_id_or_name);
+			break;
+		case 'string':
+			$this->db->where('name', $user_id_or_name);
+			break;
+		default:
+			return;
+		}
+		$query = $this->db->get($this->user_table, 1 ,0);
+		return $query ->row_array();
 	}
 
 	//更新用户信息,参数如上个函数
@@ -90,13 +107,39 @@ class Rbac_model extends CI_Model {
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 	 *@return bool 执行状态
 	 */
-	function insert_user($group_info)
+	function insert_group($group_info)
 	{
 		$group_info['created_at'] = current_datetime();
 
-		$this->db->insert($this->user_table, $group_info);
+		$this->db->insert($this->group_table, $group_info);
 
 		return $this->db->insert_id();
+	}
+
+	function get_group($group_id_or_name)
+	{
+		switch (gettype($group_id_or_name)) {
+		case 'interger':
+			$this->db->where('group_id', $group_id_or_name);
+			break;
+		case 'string':
+			$this->db->where('name', $group_id_or_name);
+			break;
+		default:
+			return;
+		}
+		$query = $this->db->get($this->group_table, 1 ,0);
+		return $query ->row_array();
+	}
+
+	function get_user_groups($user_id, $fields='groups.*'){
+		$this->db->select($fields)->from(' groups')->join('users_groups_table', 'users_groups.user_id=groups.user_id')->where('users_groups.user_id', $user_id)->get();
+		return $this->result_array();
+	}
+
+	function get_group_users($group_id){
+		$this->db->select('users.*')->from(' users')->join('users_groups_table', 'users_groups.user_id=users.user_id')->where('users_groups.group_id', $group_id)->get();
+		return $this->result_array();
 	}
 
 	//更新用户组信息,参数如上个函数
@@ -122,7 +165,7 @@ class Rbac_model extends CI_Model {
 	}
 
 	/**
-	 *增加新用户组
+	 *增加操作
 	 *
 	 *@param array $operation_info 操作信息,参照如下定义
 	 CREATE TABLE IF NOT EXISTS `operations` (
@@ -136,7 +179,7 @@ class Rbac_model extends CI_Model {
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 	 *@return bool 执行状态
 	 */
-	function insert_user($operation_info)
+	function insert_operation($operation_info)
 	{
 		$operation_info['created_at'] = current_datetime();
 
@@ -155,7 +198,7 @@ class Rbac_model extends CI_Model {
 		$this->db->where('operation_id', $operation_info['operation_id']);
 		return $this->db->update($this->operation_table, $operation_info);
 	}
-
+	
 	/**
 	 *删除操作条目
 	 *
@@ -228,7 +271,7 @@ class Rbac_model extends CI_Model {
 	 *@param array $groups_id 用户组id数组
 	 *@return bool 执行状态
 	 */
-	function delete_user_from_groups($user_id, $groups_id)
+	function delete_user_from_groups($user_id, $groups_ids)
 	{
 		$this->db->where('user_id', $user_id);
 		$this->db->where_in('group_id', $groups_id);
@@ -242,7 +285,7 @@ class Rbac_model extends CI_Model {
 	 *@param array $group_id 用户组id
 	 *@return bool 执行状态
 	 */
-	function delete_users_from_group($users_id, $group_id)
+	function delete_users_from_group($users_ids, $group_id)
 	{
 		$this->db->where('group_id', $group_id);
 		$this->db->where_in('user_id', $users_id);
@@ -322,12 +365,16 @@ class Rbac_model extends CI_Model {
 	  *@param string $operation_id 要检测的操作id
 	  *@return bool 是否具备权限
 	  */
-	function check_user_operation($user_id, $operation_id)
+	function check_user_operation($user_id, $operation_id_or_name)
 	{
 		//check if this operation is in user_operations table
+		if  (gettype($operation_id_or_name) === 'string') {
+			$operation_id_or_name = $this->db->where('name', $operation_id_or_name))
+					->get($this->operation_table)->row_array()['operation_id'];
+		}
 		$this->db->where(array(
 			'user_id' => $user_id,
-			'operation_id' => $operation_id
+			'operation_id' => $operation_id_or_name
 		));
 		
 		$user_operations = $this->db->get($this->user_operations_table);

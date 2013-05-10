@@ -30,7 +30,7 @@ class Message_model extends CI_Model {
 		-- 留言内容
 		`content` VARCHAR(100) NOT NULL,
 		-- 留言人
-		`user_name` VARCHAR(20) DEFAULT NULL,
+		`name` VARCHAR(20) DEFAULT NULL,
 		-- 是否处理 0-未处理 1-已处理
 		`is_dealt` INT(1) DEFAULT '0',
 		-- 创建时间
@@ -54,11 +54,9 @@ class Message_model extends CI_Model {
 	 *@param int $message_id 留言id
 	 *@param array 留言信息数组
 	 */
-	function get_message($message_id)
-		$query = $this->db->get_where($this->message_table, array('message_id' => $message_id), 1, 0);
-		if  ($query->num_rows() > 0) {
-			return $query ->row_array();
-		}
+	function get_message($message_id, $fields='*')
+		$query = $this->db->select($fields)->get_where($this->message_table, array('message_id' => $message_id), 1, 0);
+		return $query ->row_array();
 	}
 
 	/**
@@ -68,9 +66,9 @@ class Message_model extends CI_Model {
 	 *@param int $offset 在数据表中的偏移
 	 *@return 留言信息集
 	 */
-	function get_messages($limit = 10, $offset = 0)
+	function get_messages($limit = 10, $offset = 0, $fields='*')
 	{
-		$query = $this->db->get($this->message_table, $limit, $offset);
+		$query = $this->db->select($fields)->get($this->message_table, $limit, $offset);
 		return $query ->result_array();
 	}
 

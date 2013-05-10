@@ -29,13 +29,28 @@ CREATE TABLE IF NOT EXISTS `carriages` (
 	PRIMARY KEY (`carriage_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 */
+//
+/*
+ @modify by whl
+ @modify_time  2013/05/03
+ @modify_aspect $trains add the 'extra_info' 
+
+
+    */
+
+
+
 
 $trains = array(
 	0 => array(
-		'serial' => 'KTL89757',
+		'serial' => 'K448',
 		'extra_info' => array(
 			'meal_carriage' => 12,
-			'conductor' => '马车长'
+			'conductor' => '王小二',
+			'start_city' => '西安',
+			'end_city' => '洛阳',
+			'start_time'=>"12:34",
+			"end_time"=>"16:18"
 		)
 	)
 );
@@ -58,17 +73,23 @@ $carriages = array(
 $time_table = array(
 	0 => array(
 		'name' => '西安',
-		'arrive_time' => '00:00',
-		'leave_time' => '12:34'
+		'forth_arrive_time' => '00:00',
+		'forth_leave_time' => '12:34',
+		'back_arrive_time' => '00:00',
+		'back_leave_time' => '12:34'
 	),
 	1 => array(
 		'name' => '华山',
-		'arrive_time' => '13:00',
-		'leave_time' => '13:10'
+		'forth_arrive_time' => '13:00',
+		'forth_leave_time' => '13:10',
+		'back_arrive_time' => '13:00',
+		'back_leave_time' => '13:10'
 	),
 	2 => array(
 		'name' => '洛阳',
-		'arrive_time' => '16:12',
-		'leave_time' => '16:18'
+		'forth_arrive_time' => '16:12',
+		'forth_leave_time' => '16:18',
+		'back_arrive_time' => '16:12',
+		'back_leave_time' => '16:18'
 	)
 );

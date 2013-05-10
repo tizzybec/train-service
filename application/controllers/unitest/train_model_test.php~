@@ -29,8 +29,10 @@
 	
 	function index()
 	{
+		//empty train and carriage table
 		$this->train_model->empty_all();
 
+		//store the last id
 		$train_id = '';
 		$carriage_id = '';
 		

@@ -195,6 +195,8 @@ if (defined('ENVIRONMENT'))
 	//add by dinsy at 2013-04-29 13:57
 	define ('UNITEST_DATAPATH', APPPATH.'controllers/unitest/data/');
 
+	define ('ROOTPATH', realpath('.').'/');
+
 /*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE

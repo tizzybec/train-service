@@ -29,6 +29,7 @@
 		-- 列车编号
 		`serial` VARCHAR(20)  NOT NULL UNIQUE ,
 		-- 列车额外信息勇json格式进行编码,通常是这样{"meal_carriag": "012", "cariage_count": 20}
+		-- 注意附加车辆行驶方向信息, direction: "forth"|"back"
 		`extra_info` VARCHAR(255) DEFAULT NULL,
 		-- 创建时间
 		`created_at` DATETIME NOT NULL,
@@ -58,7 +59,7 @@
 	 */
 	function get_train($train_id)
 	{
-		$query = $this->db->get_where($this->train_table, array('train_id' => $train_id), 1, 0);
+		$query = $this->db->where('train_id', $train_id)->get($this->train_table);
 		return $query ->row_array();
 	}
 
@@ -69,10 +70,12 @@
 	 *@param int $offset 在数据表中的偏移
 	 *@return 列车信息集
 	 */
-	function get_trains($limit = 10, $offset = 0)
+	function get_trains($limit = 10, $offset = 0, $fields='*')
 	{
-		$query = $this->db->get($this->train_table, $limit, $offset);
-		return $query->result_array();
+		$query = $this->db->select($fields)->get($this->train_table, $limit, $offset);
+		$r = $query->result_array();
+		$r['extra_info'] = json_decode($r['extra_info'], TRUE);
+		return $r;
 	}
 
 	private function _time_table_order_cmp($former, $later)
@@ -83,10 +86,10 @@
 		return ($former['order']  < $later['order']) ? -1 : 1;
 	}
 	
-	function get_time_table($train_id)
+	function get_time_table($train_id, $fields='train_cities.*')
 	{
-		$this->db->where('train_id', $train_id);
-		$query = $this->db->get($this->time_table);
+		$query = $this->db->select($fields.', cities.name')->from('train_cities')->
+			join('cities', 'train_cities.city_id=cities.city_id')->where('train_cities.train_id', $train_id)->get();
 		$time_table = $query->result_array();
 		uasort($time_table, array(__CLASS__, '_time_table_order_cmp'));
 		return $time_table;
@@ -140,9 +143,10 @@
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 	 *@return bool 执行状态
 	 */
-	function insert_carriage($carriage_info )
+	function insert_carriage($train_id, $carriage_info )
 	{
 		$carriage_info['created_at'] = current_datetime();
+		$carriage_info['train_id'] = $train_id;
 		//返回新插入条目的id
 		$this->db->insert($this->carriage_table, $carriage_info);
 		return $this->db->insert_id();
@@ -158,6 +162,18 @@
 	{
 		$query = $this->db->get_where($this->carriage_table, array('carriage_id' => $carriage_id), 1, 0);
 		return $query ->row_array();
+	}
+
+	/**
+	 *获取指定列车的车厢信息
+	 *
+	 *@param int $train_id 车厢id
+	 *@param array 列车信息数组
+	 */
+	function get_train_carriages($train_id)
+	{
+		$query = $this->db->get($this->carriage_table, array('train_id' => $train_id));
+		return $query ->result_array();
 	}
 
 	/**
@@ -237,8 +253,10 @@
 				'train_id' => $train_id,
 				'city_id' => $city['city_id'],
 				'order' => ($index),
-				'arrive_time' => $city['arrive_time'],
-				'leave_time' => $city['leave_time'],
+				'forth_arrive_time' => $city['forth_arrive_time'],
+				'forth_leave_time' => $city['forth_leave_time'],
+				'back_arrive_time' => $city['back_arrive_time'],
+				'back_leave_time' => $city['back_leave_time'],
 				'created_at' => current_datetime()
 			);
 			$index += 1;
@@ -286,7 +304,12 @@
 	 */
 	function get_seat_status($carriage_id)
 	{
-		$seats_status = $this->get_carriage($carriage_id)['seat_status'];
+		$carriage = $this->get_carriage($carriage_id);
+		if (count($cariage) == 0) {
+			log_message('error', "no carriage for id".$carriage_id);
+			return;
+		}
+		$seats_status = $carriage['seat_status'];
 		return  json_decode($seats_status, TRUE);
 	}
 

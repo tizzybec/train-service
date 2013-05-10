@@ -12,17 +12,7 @@
 	*/
 	function index()
 	{
-		$this->output->enable_profiler(TRUE);
-		
-		echo 'mobile version.';
-		$this->load->library('test');
-		echo $this->test->test();
-
-		date_default_timezone_set('UTC');
-		$this->load->helper('My_utils');
-		echo current_datetime();
-		echo "\n";
-
+		echo "That's right";
 	}
  }
 

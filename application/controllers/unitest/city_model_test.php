@@ -11,8 +11,6 @@
 	/**
 	 *Show  index page
 	*/
-	var $cities = array();
-
 	function __construct()
 	{
 		parent::__construct();
@@ -56,8 +54,6 @@
 		$my_city  = $this->city_model->get_city('西安');
 		print_r($my_city);
 		echo "\n";
-
-		$my_cities = $this->city_model->get_cities();
 		
 		print_r($my_cities);
 		//echo $this->unit->report();
