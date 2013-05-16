@@ -42,7 +42,7 @@
 			$this->order_model->add_combo($c['name'], $c['items']);
 		}
 		
-		print_r($this->order_model->get_combo('方便面水套餐放'));
+		print_r($this->order_model->get_combo('方便面水套餐'));
 
 		print_r($this->order_model->get_combos());
 		

@@ -23,7 +23,7 @@
 		$this->load->library('unit_test');
 		$this->goods = $goods;
 		$this->combos = $combos;
-		$this->orders = $orders;;
+		$this->orders = $orders;
 	}
 	
 	function index()

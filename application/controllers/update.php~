@@ -35,19 +35,26 @@
 
 		require(UNITEST_DATAPATH.'city_model_data.php');
 		$this->load->model('city_model');
-		$this->cities = $cities;
 
 		require(UNITEST_DATAPATH.'train_model_data.php');
 		$this->load->model('train_model');
-		$this->trains = $trains;
-		$this->carriages = $carriages;
-		$this->time_table = $time_table;
 
-		//$this->load->library('unit_test');
+		require(UNITEST_DATAPATH.'order_model_data.php');
+		$this->load->model('order_model');
+		$this->load->library('unit_test');
+
+		require(UNITEST_DATAPATH.'article_model_data.php');
+		$this->load->model('article_model');
+
+		require(UNITEST_DATAPATH.'message_model_data.php');
+		$this->load->model('message_model');
+
+		require(UNITEST_DATAPATH.'rbac_model_data.php');
+		$this->load->model('rbac_model');
 
 		//insert city data
 		//insert user defined data to city table
-		foreach ($this->cities as $city) {
+		foreach ($cities as $city) {
 			if ( ! $this->city_model->insert_city($city)) {
 				echo "城市插入失败\n<br>";
 				return;
@@ -55,7 +62,7 @@
 		}
 		echo "城市插入成功\n<br>";
 		//insert train data
-		foreach ($this->trains as $t) {
+		foreach ($trains as $t) {
 			$train_id  = $this->train_model->insert_train($t);
 			if( ! $train_id) {
 				echo "列车插入失败\n<br>";
@@ -64,25 +71,69 @@
 		}
 		echo "列车插入成功\n<br>";
 
-		foreach ($this->carriages as $c) {
+		foreach ($carriages as $c) {
 			$carriage_id = $this->train_model->insert_carriage($train_id, $c);
 			if( ! $carriage_id) {
 				echo "车厢插入失败\n<br>";
 				return;
 			}
+			$this->train_model->set_seat_status($carriage_id, [], [3, 6, 12, 15, 20, 34, 36],[1, 2, 5, 9, 14, 21, 24, 30, 31, 32]);
 		}
 		echo "车厢插入成功\n<br>";
 
-		$length = count($this->time_table);
+		$length = count($time_table);
 		for ($i = 0; $i < $length; ++$i) {
-			$this->time_table[$i]['city_id'] =
-				$this->city_model->get_city($this->time_table[$i]['name'])['city_id'];
+			$time_table[$i]['city_id'] =
+				$this->city_model->get_city($time_table[$i]['name'])['city_id'];
 		}
 
-		if  ($this->train_model->set_time_table($train_id, $this->time_table)) {
+		if  ($this->train_model->set_time_table($train_id, $time_table)) {
 			echo "列车时刻表插入成功\n<br>";
 		} else {
 			echo "列车时刻表插入失败\n<br>";
 		}
+
+		$this->train_model->setup_current_status(array(
+			'train_id' => $train_id,
+			'created_at' => current_datetime(),
+			'status' => 1
+		));
+
+		foreach ($goods as $g) {
+			$this->order_model->insert_goods($g);
+		}
+
+		foreach ($combos as $c) {
+			$this->order_model->add_combo(array_slice($c, 0,  2,  true), $c['items']);
+		}
+
+		foreach ($orders as $o) {
+			$this->order_model->add_order(array_slice($o, 0,  3,  true), $o['combos'], $o['goods']);
+		}
+
+		foreach ($articles as $a) {
+			$this->article_model->insert_article($a);
+		}
+
+		foreach ($messages as $m) {
+			$message_id = $this->message_model->insert_message($m);
+			foreach ($comments as $c) {
+				$c['message_id'] = $message_id;
+				$this->message_model->insert_comment($c);
+			}
+		}
+
+		foreach ($users as $u) {
+			$this->rbac_model->insert_user($u);
+		}
+
+		foreach ($groups as $g) {
+			$this->rbac_model->insert_group($g);
+		}
+
+		$this->rbac_model->add_user_to_groups(
+			$this->rbac_model->get_user('admin')['user_id'],
+			[$this->rbac_model->get_group('superadmin')['group_id']]
+		);
 	}
 }

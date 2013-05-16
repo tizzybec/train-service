@@ -75,9 +75,7 @@
 				return;
 		}
 		$query = $this->db->get($this->city_table, 1, 0);
-		if  ($query->num_rows() > 0) {
-			return $query ->row_array();
-		}
+		return $query ->row_array();
 	}
 	
 	/**
@@ -119,4 +117,4 @@
 		$this->db->empty_table($this->city_table);
 	}
 }
-			 
+?>

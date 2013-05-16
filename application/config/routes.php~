@@ -44,8 +44,13 @@ $route['404_override'] = '';
 
 //url setting for mobile
 //writed by dinsy
-$route['mobile'] = 'mobile/homepage';
+$route['mobile'] = 'mobile/webpage';
 $route['unitest'] = 'unitest/unitest';
+
+$route['webapp/([\w_-]+)'] = 'mobile/webapp/$1';
+$route['webapp/appdata'] = 'mobile/webapp/appdata';
+$route['webapp/process_login'] = 'mobile/webapp/process_login';
+$route['mobile/login'] = 'mobile/webpage/login';
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

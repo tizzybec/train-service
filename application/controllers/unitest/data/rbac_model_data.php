@@ -22,8 +22,6 @@ CREATE TABLE `users` (
 CREATE TABLE `groups` (
 	`group_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(20) NOT NULL UNIQUE,
-	-- 组权限
-	`group_operations` INT(5) DEFAULT NULL,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -98,3 +96,15 @@ $groups = array(
 		'name' => 'vendor'
 	)
 );
+
+$users = array(
+	0 => array(
+		'name' => 'admin',
+		'password' => '123123'
+	),
+	1 => array(
+		'name' => 'dinsy',
+		'password' => '123123' 
+	)
+);
+?>

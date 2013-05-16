@@ -30,7 +30,10 @@ DROP TABLE IF EXISTS `messages`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `groups`;
 DROP TABLE IF EXISTS `operations`;
-DROP TABLE IF EXISTS `tips`;
+DROP TABLE IF EXISTS `articles`;
+DROP TABLE IF EXISTS `current_status`;
+DROP TABLE IF EXISTS ci_sessions;
+
 DROP TABLE IF EXISTS `menu`;
 
 --
@@ -38,13 +41,13 @@ DROP TABLE IF EXISTS `menu`;
 --
 CREATE TABLE `notices` (
 	`notice_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(20) DEFAULT NULL,
+	`name` VARCHAR(50) DEFAULT NULL,
 	-- 发送者id
 	`sender_id` INT(5) UNSIGNED DEFAULT NULL,
 	-- 消息正文
 	`content` VARCHAR(255)  NOT NULL,
 	-- 消息有效期
-	`expire` DATETIME NOT NULL,
+	`expires` DATETIME NOT NULL,
 	-- 消息等级
 	`level` INT(2) UNSIGNED DEFAULT '10',
 	-- 创建时间
@@ -54,6 +57,19 @@ CREATE TABLE `notices` (
 	PRIMARY KEY (`notice_id`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
+CREATE TABLE `current_status` (
+	`id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`train_id` INT(5) UNSIGNED NOT NULL,
+	-- 列车行驶方向 `0` -往 `1`-返
+	`direction` INT(1) UNSIGNED DEFAULT '0',
+	-- 列车状态 0-非工作状态 1-工作状态
+	`status` INT(1) UNSIGNED DEFAULT '0',
+	`created_at` DATETIME NOT NULL,
+	-- 更新时间
+	`modified_at` TIMESTAMP NOT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
 -- 
 -- 表结构 `trains` 列车
 -- 
@@ -62,7 +78,7 @@ CREATE TABLE `trains` (
 	-- 列车编号
 	`serial` VARCHAR(20)  NOT NULL UNIQUE ,
 	-- 列车额外信息勇json格式进行编码,通常是这样{"meal_carriag": "012", "cariage_count": 20}
-	`extra_info` VARCHAR(255) DEFAULT NULL,
+	`extra_info` VARCHAR(500) DEFAULT NULL,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -75,11 +91,11 @@ CREATE TABLE `trains` (
 --
 CREATE TABLE `cities` (
 	`city_id` INT(5) UNSIGNED NOT NULL	AUTO_INCREMENT,
-	`name` VARCHAR(20)  NOT NULL UNIQUE,
+	`name` VARCHAR(50)  NOT NULL UNIQUE,
 	-- 城市图片
 	`photo` VARCHAR(25) DEFAULT NULL,
 	-- 城市介绍
-	`description` VARCHAR(250)  NOT NULL,
+	`description` TEXT  NOT NULL,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -115,6 +131,8 @@ CREATE TABLE `notice_users` (
 	`id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`notice_id` INT(5) UNSIGNED NOT NULL,
 	`user_id` INT(5) UNSIGNED NOT NULL,
+	-- 0-未处理 1-已处理 2-过期
+	`status` INT(1) UNDIGNED DEFAULT '0' NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
 	`modified_at` TIMESTAMP NOT NULL,
@@ -140,7 +158,7 @@ CREATE TABLE `notice_groups` (
 CREATE TABLE `combos` (
 	`combo_id` INT(5) UNSIGNED NOT NULL	AUTO_INCREMENT,
 	-- 套餐名称
-	`name` VARCHAR(20) NOT NULL UNIQUE,
+	`name` VARCHAR(50) NOT NULL UNIQUE,
 	-- 套餐价格
 	`price` DECIMAL(5, 1) NOT NULL,
 	-- 供应状态 1-正常供应 2-停止供应
@@ -173,7 +191,7 @@ CREATE TABLE `combo_goods` (
 CREATE TABLE `goods` (
 	`goods_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
 	-- 商品名
-	`name` VARCHAR(25) NOT NULL UNIQUE,
+	`name` VARCHAR(50) NOT NULL UNIQUE,
 	`category` VARCHAR(25) NOT NULL,
 	`price` DECIMAL(5, 1)  NOT NULL,
 	-- 供应状态 1-正常供应 2-停止供应
@@ -210,6 +228,7 @@ CREATE TABLE `order_goods` (
 	`id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`order_id` INT(5) UNSIGNED NOT NULL,
 	`goods_id` INT(5) UNSIGNED NOT NULL,
+	`num` INT(5) UNSIGNED DEFAULT '0' NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
 	`modified_at` TIMESTAMP NOT NULL,
@@ -225,6 +244,7 @@ CREATE TABLE `order_combos` (
 	`id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`order_id` INT(5) UNSIGNED NOT NULL,
 	`combo_id` INT(5) UNSIGNED NOT NULL,
+	`num` INT(5) UNSIGNED DEFAULT '0' NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
 	`modified_at` TIMESTAMP NOT NULL,
@@ -232,12 +252,14 @@ CREATE TABLE `order_combos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 -- 
--- 表结构 `tips` 生活常识表
+-- 表结构 `articles` 生活常识表
 -- 
-CREATE TABLE `tips` (
-	`tip_id` INT(5) UNSIGNED NOT NULL	AUTO_INCREMENT,
+CREATE TABLE `articles` (
+	`article_id` INT(5) UNSIGNED NOT NULL	AUTO_INCREMENT,
 	-- 是否置顶 0-不置顶 1-置顶
 	`top` INT(1) DEFAULT ' 0',
+	-- 内容概览
+	`overview` VARCHAR(200) NOT NULL,
 	-- 标题
 	`title` VARCHAR(50) NOT NULL,
 	-- 图片
@@ -248,7 +270,7 @@ CREATE TABLE `tips` (
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
 	`modified_at` TIMESTAMP NOT NULL,
-	PRIMARY KEY (`tip_id`)
+	PRIMARY KEY (`article_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 
 -- 
@@ -258,10 +280,12 @@ CREATE TABLE `messages` (
 	`message_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
 	-- 留言主题
 	`theme` VARCHAR(50) DEFAULT NULL,
+	`user_id` INT(5)  UNSIGNED DEFAULT NULL,
 	-- 留言内容
-	`content` VARCHAR(100) NOT NULL,
+	`content` TEXT NOT NULL,
 	-- 留言人
-	`name` VARCHAR(20) DEFAULT NULL,
+	`name` VARCHAR(50) DEFAULT NULL,
+	`up_num`  INT(5)  UNSIGNED DEFAULT '0',
 	-- 是否处理 0-未处理 1-已处理
 	`is_dealt` INT(1) DEFAULT '0',
 	-- 创建时间
@@ -279,13 +303,13 @@ CREATE TABLE `comments` (
 	-- 留言id
 	`message_id` INT(5) UNSIGNED NOT NULL,
 	-- 作者名字
-	`name` VARCHAR(20) NOT NULL UNIQUE,
+	`name` VARCHAR(20) NOT NULL,
 	-- 是否用户 0-非注册用户 1-注册用户
-	`is_user` INT(1) DEFAULT '0',
+	`user_id` INT(5)  UNSIGNED DEFAULT NULL,
 	-- 需要 @ 的人, 都好分割,like (列车长, 乘务员)
 	`refer_to` VARCHAR(20) NOT NULL,
 	-- 回复内容
-	`content` VARCHAR(100) NOT NULL,
+	`content` TEXT NOT NULL,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -304,7 +328,7 @@ CREATE TABLE `carriages` (
 	-- 座位数量
 	`seat_capacity` INT(5) NOT NULL,
 	-- 车厢座位状态, json编码表示,{"idle": [], "occupied": [], "changing": []}
-	`seat_status` VARCHAR(100) DEFAULT NULL,
+	`seat_status` VARCHAR(500) DEFAULT NULL,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -317,8 +341,8 @@ CREATE TABLE `carriages` (
 --
 CREATE TABLE `users` (
 	`user_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(20) NOT NULL UNIQUE,
-	`password` VARCHAR(20) NOT NULL,
+	`name` VARCHAR(50) NOT NULL UNIQUE,
+	`password` VARCHAR(100) NOT NULL,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -332,7 +356,7 @@ CREATE TABLE `users` (
 -- 注意:预定义组别为:所有人(everybody), 超级管理员(superadmin), 管理员(admin), 卖家(vendor)
 CREATE TABLE `groups` (
 	`group_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(20) NOT NULL UNIQUE,
+	`name` VARCHAR(50) NOT NULL UNIQUE,
 	-- 组权限
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -345,7 +369,7 @@ CREATE TABLE `groups` (
 --
 CREATE TABLE `operations` (
 	`operation_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(20) NOT NULL UNIQUE,
+	`name` VARCHAR(50) NOT NULL UNIQUE,
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
@@ -419,6 +443,18 @@ CREATE TABLE `menu` (
 	-- 是否显示 '0'表示不显示 '1'表示显示.
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+
+
+-- for session use
+CREATE TABLE IF NOT EXISTS  `ci_sessions` (
+	`session_id` varchar(40) DEFAULT '0' NOT NULL,
+	`ip_address` varchar(45) DEFAULT '0' NOT NULL,
+	`user_agent` varchar(120) NOT NULL,
+	`last_activity` int(10) unsigned DEFAULT 0 NOT NULL,
+	`user_data` text NOT NULL,
+	PRIMARY KEY (`session_id`),
+	KEY `last_activity_idx` (`last_activity`)
+);
 
 -- foreign key for time table train_cities
 ALTER TABLE train_cities ADD FOREIGN KEY (`train_id`) REFERENCES trains(`train_id`)

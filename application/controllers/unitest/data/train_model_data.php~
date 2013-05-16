@@ -45,12 +45,10 @@ $trains = array(
 	0 => array(
 		'serial' => 'K448',
 		'extra_info' => array(
-			'meal_carriage' => 12,
-			'conductor' => '王小二',
-			'start_city' => '西安',
-			'end_city' => '洛阳',
-			'start_time'=>"12:34",
-			"end_time"=>"16:18"
+			'餐车号' => 12,
+			'列车长' => '王小二',
+			'出发城市' => '西安',
+			'终点城市' => '洛阳',
 		)
 	)
 );
@@ -73,23 +71,23 @@ $carriages = array(
 $time_table = array(
 	0 => array(
 		'name' => '西安',
-		'to_arrive_time' => '00:00',
-		'to_leave_time' => '12:34',
-		're_arrive_time' => '00:00',
-		're_leave_time' => '12:34'
+		'forth_arrive_time' => '00:00',
+		'forth_leave_time' => '12:34',
+		'back_arrive_time' => '00:00',
+		'back_leave_time' => '12:34'
 	),
 	1 => array(
 		'name' => '华山',
-		'to_arrive_time' => '13:00',
-		'to_leave_time' => '13:10',
-		're_arrive_time' => '13:00',
-		're_leave_time' => '13:10'
+		'forth_arrive_time' => '13:00',
+		'forth_leave_time' => '13:10',
+		'back_arrive_time' => '13:00',
+		'back_leave_time' => '13:10'
 	),
 	2 => array(
 		'name' => '洛阳',
-		'to_arrive_time' => '16:12',
-		'to_leave_time' => '16:18',
-		're_arrive_time' => '16:12',
-		're_leave_time' => '16:18'
+		'forth_arrive_time' => '16:12',
+		'forth_leave_time' => '16:18',
+		'back_arrive_time' => '16:12',
+		'back_leave_time' => '16:18'
 	)
 );

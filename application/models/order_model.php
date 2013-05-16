@@ -29,7 +29,7 @@
 	 *@param int $status 套餐状态 1-供应 2-不供应
 	 *@return bool 添加状态
 	 */
-	function add_combo($combo_name, $_goods, $status = 1)
+	function add_combo($combo_info, $_goods)
 	{
 		if (count($_goods) > 0 && gettype($_goods[0]) == 'string') {
 			foreach ($_goods as $g) {
@@ -40,12 +40,8 @@
 		}
 		
 		$this->db->trans_start();
-		$combo = array(
-			'name' => $combo_name,
-			'status' => $status,
-			'created_at' => current_datetime()
-		);
-		$this->db->insert($this->combo_table, $combo);
+		$combo_info['created_at'] = current_datetime();
+		$this->db->insert($this->combo_table, $combo_info);
 		$combo_id = $this->db->insert_id();
 		foreach ($goods as $g) {
 			$this->db->insert($this->combo_goods_table, array(
@@ -85,9 +81,14 @@
 		return $query ->row_array();
 	}
 
-	function get_combos($limit = 10, $offset = 0)
+	function get_combos($limit = NULL, $offset = 0)
 	{
-		$query = $this->db->get($this->combo_table, $limit, $offset);
+		if ($limit == NULL) {
+			$query = $this->db->get($this->combo_table);
+		} else {
+			$query = $this->db->get($this->combo_table, $limit, $offset);
+		}
+		
 		$combos = $query->result_array();
 
 		$result = array();
@@ -113,9 +114,6 @@
 		`custom` VARCHAR(20) DEFAULT 'sir/madam',
 		-- 送餐位置,格式为(车厢, 座位号)
 		`address` VARCHAR(10) NOT NULL,
-		-- 商品列表,JSON编码
-		`order_goods` INT(5) NOT NULL,
-		`order_combos` INT(5) NOT NULL,
 		-- 总价格
 		`total_price` INT(5) NOT NULL,
 		-- 状态 1-未送 2-在送 3-送达
@@ -132,22 +130,34 @@
 	 */
 	function add_order($order, $_combos, $_goods)
 	{
-		if (count($_goods) > 0 && gettype($_goods[0]) == 'string') {
+		$goods = array();
+		$combos = array();
+
+		if (count($_goods) > 0 && gettype($_goods[0][0]) == 'string') {
 			foreach ($_goods as $g) {
-				$goods[] = $this->get_goods($g)['goods_id'];
+				$item = $this->get_goods($g[0]);
+				if ( ! $item) {
+					continue;
+				}
+				$goods[] = [$item['goods_id'], $g[1]];
 			}
 		} else {
 			$goods = $_goods;
 		}
 
-		if (count($_combos) > 0 && gettype($_combos[0]) == 'string') {
+		if (count($_combos) > 0 && gettype($_combos[0][0]) == 'string') {
 			foreach ($_combos as $c) {
-				$combos[] = $this->get_combo($c)['combo_id'];
+				$item = $this->get_combo($c[0]);
+				if ( ! $item) {
+					continue;
+				}
+				
+				$combos[] = [$item['combo_id'], $c[1]];
 			}
 		} else {
 			$combos = $_combos;
 		}
-
+		
 		$order['created_at'] = current_datetime();
 		$this->db->trans_start();
 		$this->db->insert($this->order_table, $order);
@@ -155,8 +165,9 @@
 		
 		foreach ($combos as $c) {
 			$this->db->insert($this->order_combos_table, array(
-				'order_id' => $order_id,
-				'combo_id' => $c,
+				'order_id' => (int)$order_id,
+				'combo_id' => (int)$c[0],
+				'num' => (int)$c[1],
 				'created_at' => current_datetime() 
 			));
 		}
@@ -164,7 +175,8 @@
 		foreach ($goods as $g) {
 			$this->db->insert($this->order_goods_table, array(
 				'order_id' => $order_id,
-				'goods_id' => $g,
+				'goods_id' => $g[0],
+				'num' => $g[1],
 				'created_at' => current_datetime() 
 			));
 		}
@@ -206,9 +218,13 @@
 	 *@param int $offset 在数据表中的偏移
 	 *@return 订单信息集
 	 */
-	function get_orders($limit = 10, $offset = 0)
+	function get_orders($limit = NULL, $offset = 0)
 	{
-		$query = $this->db->get($this->order_table, $limit, $offset);
+		if ($limit == NULL) {
+			$query = $this->db->get($this->order_table);
+		} else {
+			$query = $this->db->get($this->order_table, $limit, $offset);
+		}
 		$orders = $query ->result_array();
 		$result = array();
 
@@ -324,9 +340,13 @@
 	 *@param int $offset 在数据表中的偏移
 	 *@return 套餐信息集
 	 */
-	function get_mgoods($limit = 10, $offset = 0)
+	function get_mgoods($limit = NULL, $offset = 0)
 	{
-		$query = $this->db->get($this->goods_table, $limit, $offset);
+		if ($limit == NULL) {
+			$query = $this->db->get($this->goods_table);
+		} else {
+			$query = $this->db->get($this->goods_table, $limit, $offset);
+		}
 		if  ($query->num_rows() > 0) {
 			return $query ->result_array();
 		}
@@ -341,4 +361,4 @@
 			
 	}
 }
-			
+?>

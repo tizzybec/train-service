@@ -1,4 +1,4 @@
- <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  
  /**
  *Trains_model Class
@@ -117,4 +117,4 @@
 		$this->db->empty_table($this->city_table);
 	}
 }
-			 
+?>

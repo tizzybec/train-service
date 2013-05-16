@@ -1,4 +1,4 @@
- <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  
  /**
  *Trains_model Class
@@ -11,6 +11,7 @@
 	 public $train_table = "trains";
 	 public $carriage_table = 'carriages';
 	 public $time_table = 'train_cities';
+	 public $current_status_table = 'current_status';
 	 
 	function __construct()
 	{
@@ -18,6 +19,61 @@
 		parent::__construct();
 		//load databse
 		$this->load->database();
+	}
+
+	/**
+	 *
+CREATE TABLE `current_train_status` (
+	`id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`train_id` INT(5) UNSIGNED NOT NULL,
+	-- 列车行驶方向 `0` -往 `1`-返
+	`direction` INT(1) UNSIGNED DEFAULT `0`,
+	`created_at` DATETIME NOT NULL,
+	-- 更新时间
+	`modified_at` TIMESTAMP NOT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
+	 */
+	 function setup_current_status($current_status )
+	{
+		$query = $this->db->get($this->current_status_table);
+		$num = $query->num_rows();
+		if (  $num === 1) {
+			$status_id = $query->row_array()['id'];
+			return $this->db->where('id', $status_id)->update($this->current_status_table, $current_status);
+		} else if ($num === 0) {
+			$current_status['created_at'] = current_datetime();
+			$this->db->insert($this->current_status_table, $current_status);
+			return $this->db->insert_id();
+		} else {
+			log_message("info", 'there is more than one data row in table current_status!');
+			return;
+		}
+	}
+
+	function update_current_status($current_status)
+	{
+		$query = $this->db->get($this->current_status_table);
+
+		if (  $query->num_rows !== 1) {
+			log_message("info", 'there is more than one data row in table current_status!');
+			return;
+		}
+		
+		$this->db->where('id', $query->row_array()['id']);
+		return $this->db->update($this->current_status_table, $current_status);
+	}
+
+	function get_current_status()
+	{
+		$query = $this->db->get($this->current_status_table);
+
+		if (  $query->num_rows !== 1) {
+			log_message("info", 'there is more than one data row in table current_status!');
+			return;
+		}
+		
+		return $query->row_array();
 	}
 
 	/**
@@ -57,26 +113,14 @@
 	 *@param int $train_id
 	 *@param array 列车信息数组
 	 */
-	function get_train($train_id)
+	function get_train($train_id, $fields='*')
 	{
-		$query = $this->db->where('train_id', $train_id)->get($this->train_table);
-		return $query ->row_array();
-	}
-
-	/**
-	 *返回列车信息集
-	 *
-	 *@param int $limit 需要获取的列车数量
-	 *@param int $offset 在数据表中的偏移
-	 *@return 列车信息集
-	 */
-	function get_trains($limit = 10, $offset = 0, $fields='*')
-	{
-		$query = $this->db->select($fields)->get($this->train_table, $limit, $offset);
-		$r = $query->result_array();
+		$query = $this->db->select($fields)->where('train_id', $train_id)->get($this->train_table);
+		$r = $query->row_array();
 		$r['extra_info'] = json_decode($r['extra_info'], TRUE);
 		return $r;
 	}
+
 
 	private function _time_table_order_cmp($former, $later)
 	{
@@ -88,7 +132,7 @@
 	
 	function get_time_table($train_id, $fields='train_cities.*')
 	{
-		$query = $this->db->select($fields.', cities.name')->from('train_cities')->
+		$query = $this->db->select($fields.', cities.name as city_name, train_cities.order')->from('train_cities')->
 			join('cities', 'train_cities.city_id=cities.city_id')->where('train_cities.train_id', $train_id)->get();
 		$time_table = $query->result_array();
 		uasort($time_table, array(__CLASS__, '_time_table_order_cmp'));
@@ -161,7 +205,28 @@
 	function get_carriage($carriage_id)
 	{
 		$query = $this->db->get_where($this->carriage_table, array('carriage_id' => $carriage_id), 1, 0);
-		return $query ->row_array();
+		$r = $query ->row_array();
+		if ($r) {
+			$carriage['seat_status'] = json_decode($carriage['seat_status']);
+		}
+
+		return $r;
+	}
+
+	/**
+	 *获取指定列车的指定编号车厢信息
+	 *
+	 *@param int $train_id 车厢id
+	 *@param array 列车信息数组
+	 */
+	function get_train_carriage($train_id, $carriage_serial)
+	{
+		$query = $this->db->get_where($this->carriage_table, array('train_id' => $train_id, 'serial' => $carriage_serial));
+		$carriage = $query ->row_array();
+		if ($carriage) {
+			$carriage['seat_status'] = json_decode($carriage['seat_status']);
+		}
+		return $carriage;
 	}
 
 	/**
@@ -172,21 +237,13 @@
 	 */
 	function get_train_carriages($train_id)
 	{
-		$query = $this->db->get($this->carriage_table, array('train_id' => $train_id));
-		return $query ->result_array();
-	}
-
-	/**
-	 *返回车厢信息集
-	 *
-	 *@param int $limit 需要获取的列车数量
-	 *@param int $offset 在数据表中的偏移
-	 *@return 列车信息集
-	 */
-	function get_carriages($limit = 10, $offset = 0)
-	{
-		$query = $this->db->get($this->carriage_table, $limit, $offset);
-		return $query->result_array();
+		$query = $this->db->get_where($this->carriage_table, array('train_id' => $train_id));
+		$carriages = $query ->result_array();
+		$length = count($carriages);
+		for ($i = 0; $i < $length; ++$i) {
+			$carriages[$i]['seat_status'] = json_decode($carriages[$i]['seat_status']);
+		}
+		return $carriages;
 	}
 
 	/**
@@ -309,8 +366,8 @@
 			log_message('error', "no carriage for id".$carriage_id);
 			return;
 		}
-		$seats_status = $carriage['seat_status'];
-		return  json_decode($seats_status, TRUE);
+		$seat_status = $carriage['seat_status'];
+		return  json_decode($seat_status, TRUE);
 	}
 
 	function empty_all()
@@ -319,3 +376,4 @@
 		$this->db->empty_table($this->carriage_table);
 	}
 }
+?>

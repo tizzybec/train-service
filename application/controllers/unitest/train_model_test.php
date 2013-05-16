@@ -45,6 +45,7 @@
 
 		foreach ($this->carriages as $c) {
 			$carriage_id = $this->train_model->insert_carriage($c);
+			$this->train_model->set_seat_status($carriage_id, [], [3, 6, 12, 15, 20, 34, 36],[1, 2, 5, 9, 14, 21, 24, 30, 31, 32]);
 		}
 
 		print_r($this->train_model->get_carriages());
@@ -69,7 +70,6 @@
 		print_r($this->train_model->get_time_table($train_id));
 		echo "\n";
 
-		$this->train_model->set_seat_status($carriage_id, [1,2,3], [4,5,6], [7,8,9]);
 
 		print_r($this->train_model->get_seat_status($carriage_id));
 		echo "\n";

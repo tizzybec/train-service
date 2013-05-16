@@ -45,12 +45,10 @@ $trains = array(
 	0 => array(
 		'serial' => 'K448',
 		'extra_info' => array(
-			'meal_carriage' => 12,
-			'conductor' => '王小二',
-			'start_city' => '西安',
-			'end_city' => '洛阳',
-			'start_time'=>"12:34",
-			"end_time"=>"16:18"
+			'餐车号' => 12,
+			'列车长' => '王小二',
+			'出发城市' => '西安',
+			'终点城市' => '洛阳',
 		)
 	)
 );
@@ -93,3 +91,4 @@ $time_table = array(
 		'back_leave_time' => '16:18'
 	)
 );
+?>

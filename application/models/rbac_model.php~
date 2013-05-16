@@ -9,7 +9,7 @@
 class Rbac_model extends CI_Model {
 	private $user_table = 'users';
 	private $group_table = 'groups';
-	private $users_groups_table = 'users_groups_table';
+	private $users_groups_table = 'users_groups';
 	private $user_operations_table = 'user_operations';
 	private $group_operations_table = 'group_operations';
 
@@ -18,6 +18,7 @@ class Rbac_model extends CI_Model {
 		// Call the Model constructor
 		 parent::__construct();
 		 $this->load->database();
+		 $this->load->helper('security');
 	}
 
 	/**
@@ -45,7 +46,8 @@ class Rbac_model extends CI_Model {
 	function insert_user($user_info)
 	{
 		$user_info['created_at'] = current_datetime();
-
+		$user_info['password'] = do_hash($user_info['password']);
+		//log_message('debug', $user_info['password'] );
 		$this->db->insert($this->user_table, $user_info);
 
 		return $this->db->insert_id();
@@ -70,12 +72,22 @@ class Rbac_model extends CI_Model {
 	//更新用户信息,参数如上个函数
 	function update_user($user_info)
 	{
-		 if ( ! $user_info['user_id']) {
+		 if ( ! isset($user_info['user_id'])) {
 				log_message('eror', 'user_id not is not suplied');
 				return;
 		}
 		$this->db->where('user_id', $city_info['user_id']);
 		return $this->db->update($this->user_table, $city_info);
+	}
+
+	function verify_user($user_info){
+		$user = $this->get_user($user_info['name']);
+		$password = do_hash($user_info['password']);
+		if (isset($user['password']) &&  $user['password']=== $password) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -132,8 +144,8 @@ class Rbac_model extends CI_Model {
 	}
 
 	function get_user_groups($user_id, $fields='groups.*'){
-		$this->db->select($fields)->from(' groups')->join('users_groups_table', 'users_groups.user_id=groups.user_id')->where('users_groups.user_id', $user_id)->get();
-		return $this->result_array();
+		$query = $this->db->select($fields)->from(' groups')->join('users_groups', 'users_groups.group_id=groups.group_id')->where('users_groups.user_id', $user_id)->get();
+		return $query->result_array();
 	}
 
 	function get_group_users($group_id){
@@ -250,10 +262,10 @@ class Rbac_model extends CI_Model {
 	 *@param array $groups_id 用户组id数组
 	 *@return bool 执行状态
 	 */
-	function add_user_to_groups($user_id, $groups_id)
+	function add_user_to_groups($user_id, $group_ids)
 	{
 		$batch_data = array();
-		foreach ($groups_id as $g_id) {
+		foreach ($group_ids as $g_id) {
 			$batch_data[] = array(
 				'user_id' => $user_id,
 				'operation_id' => $g_id,
@@ -368,7 +380,7 @@ class Rbac_model extends CI_Model {
 	{
 		//check if this operation is in user_operations table
 		if  (gettype($operation_id_or_name) === 'string') {
-			$operation_id_or_name = $this->db->where('name', $operation_id_or_name))
+			$operation_id_or_name = $this->db->where('name', $operation_id_or_name)
 					->get($this->operation_table)->row_array()['operation_id'];
 		}
 		$this->db->where(array(
@@ -388,7 +400,7 @@ class Rbac_model extends CI_Model {
 			$this->db->where(array(
 				'group_id' => $g['group_id'],
 				'operation_id' => $operation_id
-			);
+			));
 			$group_operations = $this->db->get($this->group_operations_table);
 			if (count($group_operations->result_array()) > 0) {
 				return TRUE;
@@ -397,3 +409,4 @@ class Rbac_model extends CI_Model {
 		return FALSE;
 	}
 }
+?>
