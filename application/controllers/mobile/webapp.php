@@ -71,10 +71,11 @@
 
 	function submit_seat()
 	{
+		
 		$status = array('msg' => 'failed', 'code' => 1);
 		
 		$post = $this->input->post();
-		
+		log_message('debug', var_export($post, true));
 		if ( ! isset($post['carriage_info'])) {
 			echo json_encode($status);
 			return;
@@ -133,7 +134,8 @@
 
 	function appdata()
 	{
-		$this->output->set_content_type('text/javascript');
+		header('Content-Type:text/javascript');
+		header('Cache-Control:max-age=0');
 		
 		$data_type = $this->input->get('type');
 		$notice_type = $this->input->get('notice');

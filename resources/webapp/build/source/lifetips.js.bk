@@ -1,0 +1,134 @@
+function redirectTo(url)
+{
+	window.location.href = url;
+}
+
+enyo.kind({
+	name: "App",
+	kind: "FittableRows",
+	fit: true,
+	components:[
+		{kind: "Panels", name: "mainPanel",narrowFit: false,  fit:true,  classes: "", arrangerKind: "CarouselArranger", draggable: false, wrap: true, components: [
+			{name: "mainContent", kind: "FittableRows", style:"width:100%",components: [
+				{kind: "onyx.Toolbar",style: "overflow: hidden;", components: [
+					{kind: "onyx.Button", content:"返回", style:"float:left",classes: "onyx-blue icon-home", ontap:"timeTable"},
+					{kind: "onyx.Button", name: "menu_icon",  content: "菜单",style:"float: right;", classes: "icon-reorder onyx-dark", ontap: "showMenu"},
+				]},
+				{name: "articleScroller",kind:"Scroller", strategyKind: "TouchScrollStrategy",components: [
+					{name:"articleRepeater", kind:"Repeater", fit:true,onSetupItem:"setupArticleItem",classes:"enyo-unselectable",components:[
+						{name:"articleItem", style:"",components: [
+							{tag: "img"},
+							{tag:"div", components:[
+								{tag:"div", name:"articleTitle"},
+								{tag:"div", name:"articleOverview"}
+							]}
+						]}
+					]}
+				]},
+				{tag: "div", content: "@copyright dinsy&powerm", style:"font-size: 10px; color: lightgrey; text-align: center"}
+			]},
+			{name: "menu", classes:"main-menu", style:"50%",  components: [
+				{kind: "onyx.Toolbar", name: "rightMenuToolbar", style: "padding-right: 0;height: 36px;", components: [
+					{kind: "onyx.Button", name:"returnIcon", style:"float:left;border: none;background:none;outline;box-shadow:none", classes: "icon-angle-left", ontap:"showMenu"},
+					{kind: "onyx.Button", name: "menuListIcon",  style:"float: right; border: none;background:none;outline;box-shadow:none;", content: "列表", classes: "icon-th-large"}
+				]},
+				{kind: "enyo.Scroller",fit: true,  strategyKind: "TouchScrollStrategy", components: [
+					{tag: "div", style: "margin-top: 1px;",classes: "icon-food menu-list-item", content: "点餐", ontap: "order"},
+					{tag: "div", classes: "icon-table menu-list-item", content: "列车时刻表", ontap: "timeTable"},
+					{tag: "div", classes: "icon-edit menu-list-item", content: "留言", ontap: "leaveMessage"},
+					{tag: "div", classes: "icon-lightbulb menu-list-item", content: "生活常识", ontap:"lifeTips"},
+					{tag: "div", classes: "icon-cogs menu-list-item", content: "登录管理", ontap: "login"}
+				]}
+			]}
+		]}
+	],
+	published: {
+		animator: function(){},
+		panelWidth: 0
+	},
+	menus:[
+		{name:" 点餐",  classes:"icon-food"},
+		{name: " 列车时刻表", classes: "icon-table"},
+		{name: " 留言", classes: "icon-edit"},
+		{name: " 生活常识", classes: "icon-lightbulb"},
+		{name: " 登录管理", classes: "icon-cogs"}
+	],
+	articles: [
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"},
+		{title:"今日要闻", overview:"最近火车站正在进行全面整治,请各位旅客认真配合.西安天气凉爽,请您注意防寒保暖", url:"/article/1"}
+	],
+	create:function(){
+		this.inherited(arguments);
+		this.$.articleRepeater.setCount(this.articles.length);
+	},
+	rendered: function() {
+		this.inherited(arguments);
+
+		var h = this.$.mainContent.getBounds().height - this.$.articleScroller.getBounds().top -5;
+		this.$.articleScroller.applyStyle("height", h + "px");
+
+		this.panelWidth = this.$.mainPanel.getBounds().width;
+		this.$.menu.applyStyle("width", this.panelWidth/2 + "px");
+
+		this.animator = new enyo.Animator({
+			duration: 300,
+			startValue:  this.$.mainPanel.getBounds().width/2,
+			endValue: 0,
+			node: this.$.mainContent.hasNode() && this.$.menu.hasNode(),
+			onStep: enyo.bind(this, this.animatorStep),
+			onEnd: enyo.bind(this, this.animatorEnd),
+			onStop: enyo.bind(this, this.animatorEnd)
+		});
+
+		//console.log(this.$.articleList.count);
+	},
+	animatorStep: function(data) {
+		//console.log( (parseInt(data.value - this.panelWidth/2)));
+		this.$.mainContent.applyStyle("left", parseInt(data.value - this.panelWidth/2) + "px") ;
+		//this.$.mainContent.addStyles("left:" + (parseInt(data.value - this.panelWidth/2)) + "px") ;
+		this.$.menu.applyStyle("left", parseInt(data.value - this.panelWidth/2) + "px");
+		//this.$.menu.addStyles("left:"+ parseInt(data.value - this.panelWidth/2)+ "px");
+		this.$.mainPanel.reflow();
+	},
+	animatorEnd: function() {
+		this.animator.reverse();
+	},
+	showMenu: function(inSender, inEvent){
+		//this.$.debug.addContent(this.panelWidth);
+		//this.$.mainContent.setStyle("left: -800px");
+		this.animator.stop();
+		this.animator.play();
+	},
+	order: function(inSender, inEvent){
+		redirectTo("order.html");
+	},
+	timeTable: function(inSender, inEvent){
+		redirectTo("index.html");
+	},
+	leaveMessage: function(inSender, inEvent){
+		redirectTo("leavemessage.html");
+	},
+	lifeTips: function(inSender, inEvent){
+		redirectTo("lifetips.html");
+	},
+	login: function(inSender, inEvent){
+		redirectTo("login.html");
+	},
+	setupArticleItem: function(inSender, inEvent) {
+		var index = inEvent.index;
+		var item = inEvent.item;
+		var article = this.articles[index];
+		item.$.articleTitle.setContent(article.title);
+		item.$.articleOverview.setContent(article.overview);
+	}
+});

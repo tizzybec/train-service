@@ -82,13 +82,21 @@
 		$this->load->view('mobile/template', $data);
 	}
 
-	function test()
+/*
+	function app_js()
 	{
-		$a = 'cent_status';
-		$this->session->set_flashdata('comment_status', 'asd');
-		//$this->session->set_flashdata('seat_status', 'asfsdf');
-		echo $this->session->flashdata($a);
-		
+		header('Cache-Control:max-age=3600');
+		header('Expires:Sun, 03 Nov 2013 14:11:06 GMT');
+		header('Content-Type:text/javascript');
+		header('Last-Modified:Tue, 07 May 2013 07:56:53 GMT');
+		$this->load->view("mobile/app_js");
 	}
+	function app_css()
+	{
+		header('Cache-Control:max-age=3600');
+		header('Content-Type:text/css');
+		$this->load->view("mobile/app_css");
+	}
+*/
  }
 

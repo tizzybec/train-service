@@ -132,7 +132,7 @@ CREATE TABLE `notice_users` (
 	`notice_id` INT(5) UNSIGNED NOT NULL,
 	`user_id` INT(5) UNSIGNED NOT NULL,
 	-- 0-未处理 1-已处理 2-过期
-	`status` INT(1) UNDIGNED DEFAULT '0' NOT NULL,
+	`status` INT(1) UNSIGNED DEFAULT '0' NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间
 	`modified_at` TIMESTAMP NOT NULL,

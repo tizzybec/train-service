@@ -4465,7 +4465,7 @@ rendered: function() {
 this.inherited(arguments);
 var e = this.$.mainPanel.getBounds().height - this.$.rightMenuToolbar.getBounds().height;
 this.$.menuScroller.applyStyle("height", e + "px"), this.panelWidth = this.$.mainPanel.getBounds().width, this.$.menu.applyStyle("width", this.panelWidth / this.divide + "px"), this.animator = new enyo.Animator({
-duration: 300,
+duration: 0,
 startValue: this.$.mainPanel.getBounds().width / this.divide,
 endValue: 0,
 node: this.$.mainContent.hasNode() && this.$.menu.hasNode(),
@@ -4483,24 +4483,24 @@ animatorEnd: function() {
 this.animator.reverse();
 },
 showMenu: function(e, t) {
-this.animator.stop(), this.animator.play();
+enyo.log("menu clicked"), this.animator.stop(), this.animator.play();
 },
 beginEdit: function(e, t) {},
 endEdit: function(e, t) {},
 toOrder: function(e, t) {
-redirectTo("/mobile/webpage/order");
+return e.disabled = !0, redirectTo("/mobile/webpage/order"), !0;
 },
 toHome: function(e, t) {
-redirectTo("/mobile/webpage/");
+return e.disabled = !0, redirectTo("/mobile/webpage/"), !0;
 },
 toMessage: function(e, t) {
-redirectTo("/mobile/webpage/messages");
+return e.disabled = !0, redirectTo("/mobile/webpage/messages"), !0;
 },
 toLifetips: function(e, t) {
-redirectTo("/mobile/webpage/lifetips");
+return e.disabled = !0, redirectTo("/mobile/webpage/lifetips"), !0;
 },
 toManage: function(e, t) {
-redirectTo("/mobile/manage");
+return e.disabled = !0, redirectTo("/mobile/manage"), !0;
 },
 setupMsgItem: function(e, t) {
 var n = t.index, r = t.item, i = AppData.msg[n];
@@ -4511,10 +4511,10 @@ var n = t.index, r = t.item, i = AppData.notice[n];
 r.$.msgContent.setContent(i.content);
 },
 closeMsg: function(e, t) {
-e.parent.hide();
+return e.parent.hide(), !0;
 },
 closeNotice: function(e, t) {
-e.parent.hide();
+return e.parent.hide(), !0;
 }
 }), App.menuComponents = {
 name: "menu",
@@ -4565,7 +4565,7 @@ ontap: "toMessage"
 tag: "div",
 classes: "icon-lightbulb menu-list-item",
 content: "\u751f\u6d3b\u5e38\u8bc6",
-ontap: "toLifeyips"
+ontap: "toLifetips"
 }, {
 tag: "div",
 classes: "icon-cogs menu-list-item",
@@ -4784,10 +4784,10 @@ kind: "onyx.Button",
 content: "\u8fd4\u56de",
 style: "float:left",
 classes: "onyx-blue icon-home",
-ontap: "lifeTips"
+ontap: "toLifetips"
 }, {
 kind: "onyx.Button",
-name: "menu_icon",
+name: "menuIcon",
 content: "\u83dc\u5355",
 style: "float: right;",
 classes: "icon-reorder onyx-dark",
@@ -5074,7 +5074,7 @@ onblur: "endEdit",
 placeholder: "\u60a8\u7684\u8bc4\u8bba."
 }, {
 kind: "onyx.Button",
-style: "width: 14%;height: 100%;min-height: 45px;",
+style: "width: 14%;height: 100%;min-height: 45px;padding: 0;",
 classes: "onyx-affirmative",
 content: "\u8bc4\u8bba",
 ontap: "submitComment"
@@ -5189,20 +5189,24 @@ style: "padding: 5px; clear: both;height: 70px;margin-top: 5px;border-radius: 0p
 components: [ {
 tag: "img",
 name: "articleImage",
-style: "padding:5px;width:60px; height:60px;border:none;float: left;margin-right: 5px"
+style: "padding:5px;width:60px; height:60px;border:none;float: left;margin-right: 5px",
+ontap: "toArticle"
 }, {
 tag: "div",
 name: "wordWrapper",
 style: "padding: 5px;overflow:hidden",
+ontap: "toArticle",
 components: [ {
 tag: "div",
 name: "articleTitle",
 classes: "",
-style: "font-size: 14px;height:18px;color:grey;overflow: hidden;"
+ontap: "toArticle",
+style: "font-size: 14px;height:14px;color:grey;overflow: hidden;"
 }, {
 tag: "div",
 name: "articleOverview",
-style: "font-size: 12px;height: 24px;color: #2f3e46;padding: 5px 5px 5px 0;overflow: hidden;"
+ontap: "toArticle",
+style: "font-size: 12px;height: 22px;color: #2f3e46;padding: 5px 5px 5px 0;overflow: hidden;"
 } ]
 } ]
 } ]
@@ -5220,6 +5224,7 @@ var e = this.$.mainContent.getBounds().height - this.$.wrapper.getBounds().top;
 this.$.wrapper.applyStyle("height", e + "px");
 },
 toArticle: function(e, t) {
+e.disabled = !0;
 var n = t.index;
 articleId = this.articles[n].article_id, redirectTo("/mobile/webpage/article/" + articleId);
 },
@@ -5271,6 +5276,7 @@ style: "padding: 0  5px 5px 5px;background-color: rgb(245, 245, 245);",
 components: [ App.noticeComponents, {
 kind: "Scroller",
 name: "seatScroller",
+fit: !0,
 strategyKind: "TouchScrollStrategy",
 components: [ {
 name: "seatRepeater",
@@ -5350,6 +5356,7 @@ e.applyStyle("background-color", "yellow"), this.seats.changing.push(r), e.setPr
 return !0;
 },
 submitSeat: function(e, t) {
+e.disabled = !0;
 var n = {
 carriage_info: JSON.stringify({
 carriage_id: parseInt(this.carriageinfo.carriage_id),
@@ -5812,12 +5819,14 @@ postBody: r,
 sync: !0,
 method: "POST"
 });
-s.response(this, "processSubmit"), s.error(this, "errorSubmit"), s.go();
+s.response(this, "processSubmit"), s.error(this, "errorSubmit"), s.go(), e.disabled = !0;
 },
 processSubmit: function(e, t) {
-t.code == 0 && (location.reload(), console.log("submit order succed!"));
+t.code == 0 && (location.reload(), console.log("submit order succed!")), this.$.menuListIcon.disabled = !1;
 },
-errorSubmit: function(e, t) {}
+errorSubmit: function(e, t) {
+this.$.menuListIcon.disabled = !1;
+}
 });
 
 // traininfo.js
@@ -5879,7 +5888,7 @@ classes: "info-item",
 style: "border-bottom: solid 1px grey;height: 40px",
 components: [ {
 tag: "span",
-style: "width: 30%;height: 100%",
+style: "width: 30%;height: 100%;border-right: solid 1px grey;",
 components: [ {
 tag: "span",
 name: "infoField",
@@ -5887,11 +5896,10 @@ style: ""
 } ]
 }, {
 tag: "span",
-style: "width: 70%",
+style: "width: 60%",
 components: [ {
 tag: "span",
-name: "infoValue",
-style: "border-left: solid 1px grey;"
+name: "infoValue"
 } ]
 } ]
 } ]
@@ -5912,19 +5920,17 @@ classes: "info-item",
 style: "border-bottom: solid 1px grey; height: 40px",
 components: [ {
 tag: "span",
-style: "width: 30%;height: 100%",
+style: "width: 30%;height: 100%;border-right: solid 1px grey;",
 components: [ {
 tag: "span",
-name: "infoField",
-style: ""
+name: "infoField"
 } ]
 }, {
 tag: "span",
-style: "width: 70%;",
+style: "width: 60%;",
 components: [ {
 tag: "span",
-name: "infoValue",
-style: "border-left: solid 1px grey;"
+name: "infoValue"
 } ]
 } ]
 } ]
@@ -6094,27 +6100,33 @@ components: [ {
 tag: "div",
 name: "authorName",
 style: "padding: 5px; font-size: 14px; font-weight: bold",
-allowHtml: !0
+allowHtml: !0,
+ontap: "toComment"
 }, {
 tag: "hr",
-style: "width: 50%; margin:0px;border-top: dashed 1px grey;"
+style: "width: 50%; margin:0px;border-top: dashed 1px grey;",
+ontap: "toComment"
 }, {
 tag: "div",
 name: "messageContent",
-style: "padding: 10px 5px;font-size: 14px;"
+style: "padding: 10px 5px;font-size: 14px;",
+ontap: "toComment"
 }, {
 tag: "div",
 style: "text-align:right;",
+ontap: "toComment",
 components: [ {
 tag: "span",
 name: "upNum",
 style: "margin-right: 10px;",
-classes: "icon-thumbs-up toy-orange"
+classes: "icon-thumbs-up toy-orange",
+ontap: "toComment"
 }, {
 tag: "span",
 name: "commentNum",
 style: "margin-right: 10px;",
-classes: "icon-comments enyo-blue"
+classes: "icon-comments enyo-blue",
+ontap: "toComment"
 } ]
 } ]
 } ]
@@ -6134,14 +6146,14 @@ this.inherited(arguments);
 },
 toComment: function(e, t) {
 var n = t.index;
-messageId = this.messages[n].message_id, redirectTo("/mobile/webpage/message/" + messageId);
+return messageId = this.messages[n].message_id, redirectTo("/mobile/webpage/message/" + messageId), !0;
 },
 setupArticleItem: function(e, t) {
 var n = t.index, r = this.messages[n];
 this.$.authorName.setContent(r.name + "<small class='toy-orange' style='font-weight:normal'>&nbsp;&nbsp;@2013-05-01 12:12</small>"), this.$.messageContent.setContent(r.content), this.$.upNum.setContent(r.up_num), this.$.commentNum.setContent(r.comment_num);
 },
 showMsgArea: function(e, t) {
-this.$.commentBody.getComputedStyleValue("display") == "none" ? this.$.commentBody.applyStyle("display", "block") : this.$.commentBody.applyStyle("display", "none");
+return this.$.commentBody.getComputedStyleValue("display") == "none" ? this.$.commentBody.applyStyle("display", "block") : this.$.commentBody.applyStyle("display", "none"), !0;
 },
 submitMessage: function(e, t) {
 var n = this.$.userName.getValue(), r = this.$.userEmail.getValue(), i = this.$.commentTextarea.getValue();
@@ -6230,8 +6242,8 @@ classes: "manage-left"
 }, {
 kind: "onyx.Button",
 classes: "manage-right manage-button onyx-negative",
-content: "\u70b9\u51fb\u67e5\u770b",
-ontap: "toTraininfo"
+ontap: "toTraininfo",
+content: "\u70b9\u51fb\u67e5\u770b"
 } ]
 } ]
 }, {
@@ -6242,28 +6254,29 @@ components: [ {
 tag: "div",
 classes: "manage-row",
 components: [ {
-tag: "div",
-content: "\u5f53\u524d\u8f66\u53a2",
+tag: "span",
+content: "\u8f66\u53a2\u7ba1\u7406",
 classes: "manage-left"
+} ]
 }, {
+tag: "div",
+classes: "manage-row",
+components: [ {
 kind: "onyx.InputDecorator",
-classes: "manage-right",
+classes: "manage-left",
+style: "padding: 2px; width: 30%",
 alwaysLooksFocused: !0,
 components: [ {
 kind: "onyx.Input",
 style: "width: 100%; text-align: right;",
 name: "carriageSerial",
-value: "1"
-} ]
+placeholder: "\u8f66\u53a2\u53f7"
 } ]
 }, {
-tag: "div",
-classes: "manage-row manage-row-button",
+kind: "onyx.Button",
+classes: "manage-right manage-button onyx-negative",
 ontap: "toSeat",
-components: [ {
-tag: "div",
-content: "\u70b9\u51fb\u7ba1\u7406\u5f53\u524d\u8f66\u53a2",
-classes: "manage-widen-button"
+content: "\u70b9\u51fb\u67e5\u770b"
 } ]
 } ]
 } ]
@@ -6275,10 +6288,10 @@ create: function() {
 this.inherited(arguments);
 },
 toSeat: function(e, t) {
-redirectTo("/mobile/manage/carriage/" + this.$.carriageSerial.getValue());
+return e.disabled = !0, redirectTo("/mobile/manage/carriage/" + this.$.carriageSerial.getValue()), !0;
 },
 toTraininfo: function(e, t) {
-redirectTo("/mobile/manage/traininfo");
+return e.disabled = !0, redirectTo("/mobile/manage/traininfo"), !0;
 },
 rendered: function() {
 this.inherited(arguments), this.panelWidth = this.$.mainPanel.getBounds().width;
@@ -6408,7 +6421,7 @@ var e = this.$.mainContent.getBounds().height - this.$.mainToolbar.getBounds().h
 this.$.wrapper.applyStyle("height", e + "px");
 },
 login: function(e, t) {
-console.log("login..."), _this = this;
+e.disabled = !0, console.log("login..."), _this = this;
 var n = {
 name: _this.$.userName.getValue(),
 password: _this.$.password.getValue()

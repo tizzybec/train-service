@@ -3660,6 +3660,9 @@ p {
   border: none;
   padding: 10px;
 }
+.onyx-toolbar {
+  padding: 5px 8px;
+}
 .welcome-div {
   background-color: yellow;
   padding: 10px;
@@ -3803,7 +3806,7 @@ p {
   width: 80px;
 }
 .userinfo-row .onyx-input-decorator {
-  width: 25%;
+  width: 50%;
 }
 .manage-row .manage-left,
 .userinfo-left,
@@ -3823,7 +3826,7 @@ p {
 }
 .manage-groupbox,
 .userinfo-groupbox {
-  margin: 15px;
+  margin: 5px;
 }
 .manage-widen-button {
   display: inline-block;
