@@ -87,6 +87,7 @@ CREATE TABLE `notices` (
 			$query = $this->db->where('group_id', $group_id)->get();
 			return $query->result_array();
 		}
+		
 		$user_groups = array_value_recursive($this->rbac->get_user_groups($user_id, "group.group_id"));
 		this->db->select(fields)->from('notices')->join('notice_users', 'notices.notice_id=notice_users.notice_id')->where('notice_users.user_id', $user_id)
 			->join('notice_groups', 'notices.notice_id=notice_groups.notice_id')->where_in('notice_groups.group_id', $user_groups);

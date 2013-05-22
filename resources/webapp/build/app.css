@@ -3661,7 +3661,7 @@ p {
   padding: 10px;
 }
 .onyx-toolbar {
-  padding: 5px 8px;
+  padding: 5px 0;
 }
 .welcome-div {
   background-color: yellow;

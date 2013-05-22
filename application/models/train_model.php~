@@ -129,7 +129,8 @@ CREATE TABLE `current_train_status` (
 		}
 		return ($former['order']  < $later['order']) ? -1 : 1;
 	}
-	
+
+	//to-do 增加方向
 	function get_time_table($train_id, $fields='train_cities.*')
 	{
 		$query = $this->db->select($fields.', cities.name as city_name, train_cities.order')->from('train_cities')->
@@ -148,7 +149,7 @@ CREATE TABLE `current_train_status` (
 	function update_train($train_info)
 	{
 		 if ( ! isset($train_info['train_id'])) {
-			log_message('eror', 'train_id not is not suplied');
+			log_message('error', 'train_id not is not suplied');
 			return;
 		}
 		
@@ -209,6 +210,8 @@ CREATE TABLE `current_train_status` (
 		if ($r) {
 			$carriage['seat_status'] = json_decode($carriage['seat_status']);
 		}
+
+		return $r;
 	}
 
 	/**

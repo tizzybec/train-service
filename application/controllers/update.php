@@ -13,7 +13,7 @@
 	function index()
 	{
 		//$this->load->database();
-		$str = file_get_contents(ROOTPATH.'scripts/init_tables_0506.sql');
+		$str = file_get_contents(ROOTPATH.'scripts/init_tables_current.sql');
 		//echo $sql;
 		$conn = mysqli_connect('localhost', 'root', '123123');
 

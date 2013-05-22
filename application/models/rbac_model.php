@@ -84,7 +84,8 @@ class Rbac_model extends CI_Model {
 		$user = $this->get_user($user_info['name']);
 		$password = do_hash($user_info['password']);
 		if (isset($user['password']) &&  $user['password']=== $password) {
-			return true;
+			return
+		;
 		} else {
 			return false;
 		}

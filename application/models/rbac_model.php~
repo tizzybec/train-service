@@ -268,7 +268,7 @@ class Rbac_model extends CI_Model {
 		foreach ($group_ids as $g_id) {
 			$batch_data[] = array(
 				'user_id' => $user_id,
-				'operation_id' => $g_id,
+				'group_id' => $g_id,
 				'created_at' => current_datetime()
 			);
 		}

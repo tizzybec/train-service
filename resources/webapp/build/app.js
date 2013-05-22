@@ -4577,7 +4577,7 @@ ontap: "toManage"
 }, App.noticeComponents = {
 tag: "div",
 name: "noticeWrapper",
-style: "z-index: 100;position: absolute; top: 0; height: 50px; width: 80%;",
+style: "z-index: 100;position: absolute; top: 0; width: 80%;",
 components: [ {
 name: "msg",
 components: [ {
@@ -5027,7 +5027,7 @@ alwaysLooksFocused: !0,
 components: [ {
 kind: "onyx.Input",
 name: "userName",
-style: "width: 100%;",
+style: "width: 90%;",
 classes: "my-input-decorator",
 onfocus: "beginEdit",
 onblur: "endEdit",
@@ -5047,7 +5047,7 @@ alwaysLooksFocused: !0,
 components: [ {
 kind: "onyx.Input",
 name: "userEmail",
-style: "width: 100%;",
+style: "width: 90%;",
 classes: "my-input-decorator",
 onfocus: "beginEdit",
 onblur: "endEdit",
@@ -5206,7 +5206,7 @@ style: "font-size: 14px;height:14px;color:grey;overflow: hidden;"
 tag: "div",
 name: "articleOverview",
 ontap: "toArticle",
-style: "font-size: 12px;height: 22px;color: #2f3e46;padding: 5px 5px 5px 0;overflow: hidden;"
+style: "font-size: 12px;height: 23px;color: #2f3e46;padding: 5px 5px 5px 0;overflow: hidden;"
 } ]
 } ]
 } ]
@@ -6021,7 +6021,7 @@ alwaysLooksFocused: !0,
 components: [ {
 kind: "onyx.Input",
 name: "userName",
-style: "width: 100%;",
+style: "width: 90%;",
 classes: "my-input-decorator",
 onfocus: "beginEdit",
 onblur: "endEdit",
@@ -6041,7 +6041,6 @@ alwaysLooksFocused: !0,
 components: [ {
 kind: "onyx.Input",
 name: "userEmail",
-style: "width: 100%;",
 classes: "my-input-decorator",
 onfocus: "beginEdit",
 onblur: "endEdit",

@@ -13,7 +13,7 @@
 	function index()
 	{
 		//$this->load->database();
-		$str = file_get_contents(ROOTPATH.'scripts/init_tables_0506.sql');
+		$str = file_get_contents(ROOTPATH.'scripts/init_tables_current.sql');
 		//echo $sql;
 		$conn = mysqli_connect('localhost', 'root', '123123');
 
@@ -134,6 +134,11 @@
 		$this->rbac_model->add_user_to_groups(
 			$this->rbac_model->get_user('admin')['user_id'],
 			[$this->rbac_model->get_group('superadmin')['group_id']]
+		);
+
+		$this->rbac_model->add_user_to_groups(
+			$this->rbac_model->get_user('dinsy')['user_id'],
+			[$this->rbac_model->get_group('admin')['group_id']]
 		);
 	}
 }

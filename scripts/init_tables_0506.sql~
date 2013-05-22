@@ -161,8 +161,8 @@ CREATE TABLE `combos` (
 	`name` VARCHAR(50) NOT NULL UNIQUE,
 	-- 套餐价格
 	`price` DECIMAL(5, 1) NOT NULL,
-	-- 供应状态 1-正常供应 2-停止供应
-	`status` INT(2) DEFAULT '1',
+	-- 供应状态 0-正常供应 1-停止供应
+	`status` INT(2) DEFAULT '0',
 	-- 创建时间
 	`created_at` DATETIME NOT NULL,
 	-- 更新时间

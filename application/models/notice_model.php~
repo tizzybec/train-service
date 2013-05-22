@@ -107,4 +107,4 @@ CREATE TABLE `notices` (
 		$this->db->delete($this->notice_table, array('notice_id' => $notice_id));
 	}
 }
-			
+?>

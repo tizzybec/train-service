@@ -129,7 +129,8 @@ CREATE TABLE `current_train_status` (
 		}
 		return ($former['order']  < $later['order']) ? -1 : 1;
 	}
-	
+
+	//to-do 增加方向
 	function get_time_table($train_id, $fields='train_cities.*')
 	{
 		$query = $this->db->select($fields.', cities.name as city_name, train_cities.order')->from('train_cities')->
@@ -148,7 +149,7 @@ CREATE TABLE `current_train_status` (
 	function update_train($train_info)
 	{
 		 if ( ! isset($train_info['train_id'])) {
-			log_message('eror', 'train_id not is not suplied');
+			log_message('error', 'train_id not is not suplied');
 			return;
 		}
 		
@@ -171,20 +172,6 @@ CREATE TABLE `current_train_status` (
 	 *新建车厢条目
 	 *
 	 *@param array 如下
-	 CREATE TABLE IF NOT EXISTS `carriages` (
-		`carriage_id` INT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-		-- 车厢编号
-		`serial` VARCHAR(20) NOT NULL UNIQUE,
-		-- 座位数量
-		`seat_capacity` INT(5) NOT NULL,
-		-- 车厢座位状态, json编码表示,{"idle": [], "occupied": [], "changing": []}
-		`seat_status` VARCHAR(100) NOT NULL,
-		-- 创建时间
-		`created_at` DATETIME NOT NULL,
-		-- 更新时间
-		`modified_at` TIMESTAMP NOT NULL,
-		PRIMARY KEY (`carriage_id`)
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci AUTO_INCREMENT=1;
 	 *@return bool 执行状态
 	 */
 	function insert_carriage($train_id, $carriage_info )
